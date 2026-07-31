@@ -7,6 +7,8 @@ libshv_add_library(libshviotqt
 		src/acl/aclrole.cpp
 		src/acl/aclroleaccessrules.cpp
 		src/acl/acluser.cpp
+		src/brc/brclogloader.cpp
+		src/brc/brclogparser.cpp
 		src/node/filenode.cpp
 		src/node/localfsnode.cpp
 		src/node/propertynode.cpp
@@ -28,6 +30,8 @@ libshv_add_library(libshviotqt
 		include/shv/iotqt/acl/aclrole.h
 		include/shv/iotqt/acl/aclroleaccessrules.h
 		include/shv/iotqt/acl/acluser.h
+		include/shv/iotqt/brc/brclogloader.h
+		include/shv/iotqt/brc/brclogparser.h
 		include/shv/iotqt/node/filenode.h
 		include/shv/iotqt/node/localfsnode.h
 		include/shv/iotqt/node/propertynode.h
