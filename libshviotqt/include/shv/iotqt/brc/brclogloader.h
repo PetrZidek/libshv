@@ -24,7 +24,7 @@ public:
 	void getLog(const std::string &shv_path, const shv::chainpack::RpcValue::DateTime &since, const shv::chainpack::RpcValue::DateTime &until);
 	void stop();
 
-	Q_SIGNAL void logLoaded(const shv::chainpack::RpcValue &log, GetLogState state);
+	Q_SIGNAL void logLoaded(const shv::chainpack::RpcValue &log, GetLogState state, int progress);
 	Q_SIGNAL void error(const QString &err_msg);
 
 private:
@@ -32,9 +32,11 @@ private:
 	void fetchNextChunk(int64_t next_id, int attempts_left = 3);
 	void emitLogLoadedAndDelete(const shv::chainpack::RpcValue &log);
 	void emitErrorAndDelete(const QString &err_msg);
+	int progressPercent(int64_t current_id) const;
 
 	QPointer<shv::iotqt::rpc::ClientConnection> m_connection;
 	std::string m_shvPath;
+	int64_t m_sinceId = 0;
 	int64_t m_lastValidId = 0;
 	bool m_stop = false;
 };

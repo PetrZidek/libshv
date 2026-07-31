@@ -67,6 +67,7 @@ void BrcLogLoader::getDateSpan(const shv::chainpack::RpcValue::DateTime &since, 
 			return;
 		}
 
+		m_sinceId = since_id;
 		m_lastValidId = until_id;
 		fetchNextChunk(since_id);
 	});
@@ -93,6 +94,7 @@ void BrcLogLoader::fetchNextChunk(int64_t next_id, int attempts_left)
 		if (raw_records.empty()) {
 			//empty result can mean either "no more data" or an ID hole wider than CHUNK_RECORD_COUNT, try the next window
 			auto next_window = next_id + CHUNK_RECORD_COUNT;
+			emit logLoaded({}, GetLogState::ReadingNextChunk, progressPercent(next_window - 1));
 			QTimer::singleShot(CHUNK_DELAY_MS, this, [this, next_window]() {
 				fetchNextChunk(next_window);
 			});
@@ -119,7 +121,7 @@ void BrcLogLoader::fetchNextChunk(int64_t next_id, int attempts_left)
 			return;
 		}
 
-		emit logLoaded(filtered, GetLogState::ReadingNextChunk);
+		emit logLoaded(filtered, GetLogState::ReadingNextChunk, progressPercent(last_fetched_id));
 		auto resume_id = last_fetched_id + 1;
 		QTimer::singleShot(CHUNK_DELAY_MS, this, [this, resume_id]() {
 			fetchNextChunk(resume_id);
@@ -139,7 +141,7 @@ void BrcLogLoader::fetchNextChunk(int64_t next_id, int attempts_left)
 
 void BrcLogLoader::emitLogLoadedAndDelete(const shv::chainpack::RpcValue &log)
 {
-	emit logLoaded(log, GetLogState::Finished);
+	emit logLoaded(log, GetLogState::Finished, 100);
 	deleteLater();
 }
 
@@ -147,6 +149,15 @@ void BrcLogLoader::emitErrorAndDelete(const QString &err_msg)
 {
 	emit error(err_msg);
 	deleteLater();
+}
+
+int BrcLogLoader::progressPercent(int64_t current_id) const
+{
+	if (m_lastValidId <= m_sinceId) {
+		return 100;
+	}
+	auto fraction = static_cast<double>(current_id - m_sinceId) / static_cast<double>(m_lastValidId - m_sinceId);
+	return qBound(0, static_cast<int>(fraction * 100), 100);
 }
 
 } // namespace shv::iotqt::brc
